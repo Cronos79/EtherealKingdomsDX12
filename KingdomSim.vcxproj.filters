@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{ba0f75fa-b46b-477f-ad01-73991db4fbc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{93f9a5b9-11d8-4681-a957-65e15925a67b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{6196e898-9252-4743-9868-6a7a27aadcde}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Game\GameApp.cpp" />
+    <ClCompile Include="Engine\Platform\KSWindow.cpp" />
+    <ClCompile Include="Engine\KSContext.cpp" />
+    <ClCompile Include="Engine\Graphics\KSDirectX12.cpp" />
+    <ClCompile Include="Engine\Logger\KSLogger.cpp" />
+    <ClCompile Include="Engine\Graphics\Mesh.cpp" />
+    <ClCompile Include="Engine\Graphics\Material.cpp" />
+    <ClCompile Include="Engine\Graphics\Model.cpp" />
+    <ClCompile Include="Engine\Graphics\Camera.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game\GameApp.h" />
+    <ClInclude Include="Engine\Platform\WinInclude.h" />
+    <ClInclude Include="Engine\Platform\KSWindow.h" />
+    <ClInclude Include="Engine\KSContext.h" />
+    <ClInclude Include="Engine\Graphics\KSDirectX12.h" />
+    <ClInclude Include="Engine\Logger\KSLogger.h" />
+    <ClInclude Include="Engine\Graphics\Mesh.h" />
+    <ClInclude Include="Engine\Graphics\Material.h" />
+    <ClInclude Include="Engine\Graphics\Model.h" />
+    <ClInclude Include="Engine\Graphics\Camera.h" />
+    <ClInclude Include="Engine\Graphics\CameraCB.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\VS.hlsl" />
+    <FxCompile Include="Shaders\PS.hlsl" />
+  </ItemGroup>
+</Project>
