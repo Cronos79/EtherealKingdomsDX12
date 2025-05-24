@@ -33,6 +33,7 @@
     <ClCompile Include="ThirdParty\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="ThirdParty\imgui\imgui_tables.cpp" />
     <ClCompile Include="ThirdParty\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Engine\Assets\AssetManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\GameApp.h" />
@@ -55,6 +56,9 @@
     <ClInclude Include="ThirdParty\imgui\imstb_textedit.h" />
     <ClInclude Include="ThirdParty\imgui\imstb_truetype.h" />
     <ClInclude Include="Engine\Platform\Keyboard.h" />
+    <ClInclude Include="Engine\Assets\AssetManager.h" />
+    <ClInclude Include="Engine\Assets\Texture.h" />
+    <ClInclude Include="Engine\Assets\Sound.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

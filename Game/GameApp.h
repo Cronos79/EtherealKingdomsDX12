@@ -24,6 +24,6 @@ private:
 	void RenderFrame();
 
 private:
-	Camera m_camera;
-	std::vector<std::unique_ptr<Model>> m_models;
+	KSEngine::Camera m_camera;
+	std::vector<std::unique_ptr<KSEngine::Model>> m_models;
 };

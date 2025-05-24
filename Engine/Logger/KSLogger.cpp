@@ -7,7 +7,7 @@
 #include <comdef.h>
 #include "Engine/Platform/WinInclude.h"
 
-std::mutex KSLogger::s_mutex;
+std::mutex KSEngine::KSLogger::s_mutex;
 
 namespace
 {
@@ -15,26 +15,26 @@ namespace
 	constexpr WORD COLOR_WARNING = 14;  // Yellow
 	constexpr WORD COLOR_ERROR = 12;  // Red
 
-	WORD GetColor(KSLogger::Level level)
+	WORD GetColor(KSEngine::KSLogger::Level level)
 	{
 		switch (level)
 		{
-		case KSLogger::Level::Info:    return COLOR_INFO;
-		case KSLogger::Level::Warning: return COLOR_WARNING;
-		case KSLogger::Level::Error:   return COLOR_ERROR;
-		case KSLogger::Level::Fatal:   return COLOR_ERROR;
+		case KSEngine::KSLogger::Level::Info:    return COLOR_INFO;
+		case KSEngine::KSLogger::Level::Warning: return COLOR_WARNING;
+		case KSEngine::KSLogger::Level::Error:   return COLOR_ERROR;
+		case KSEngine::KSLogger::Level::Fatal:   return COLOR_ERROR;
 		default: return COLOR_INFO;
 		}
 	}
 
-	std::wstring LevelToString(KSLogger::Level level)
+	std::wstring LevelToString(KSEngine::KSLogger::Level level)
 	{
 		switch (level)
 		{
-		case KSLogger::Level::Info:    return L"INFO";
-		case KSLogger::Level::Warning: return L"WARNING";
-		case KSLogger::Level::Error:   return L"ERROR";
-		case KSLogger::Level::Fatal:   return L"FATAL";
+		case KSEngine::KSLogger::Level::Info:    return L"INFO";
+		case KSEngine::KSLogger::Level::Warning: return L"WARNING";
+		case KSEngine::KSLogger::Level::Error:   return L"ERROR";
+		case KSEngine::KSLogger::Level::Fatal:   return L"FATAL";
 		default: return L"UNKNOWN";
 		}
 	}
@@ -60,52 +60,55 @@ namespace
 	}
 }
 
-void KSLogger::LogImpl(Level level, const char* file, int line, const char* func, const std::wstring& msg)
+namespace KSEngine
 {
-	std::lock_guard lock(s_mutex);
-
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(hConsole, &csbi);
-	WORD oldColor = csbi.wAttributes;
-
-	std::wstring wfile = ToWide(file);
-	std::wstring wfunc = ToWide(func);
-
-	SetConsoleTextAttribute(hConsole, GetColor(level));
-	std::wcout << L"[" << GetTimestamp() << L"] [" << LevelToString(level) << L"] "
-		<< L"(" << wfile << L":" << line << L" " << wfunc << L") "
-		<< msg << std::endl;
-	SetConsoleTextAttribute(hConsole, oldColor);
-
-	if (level == Level::Fatal)
+	void KSLogger::LogImpl(Level level, const char* file, int line, const char* func, const std::wstring& msg)
 	{
-		WriteCrashLog(L"(" + wfile + L":" + std::to_wstring(line) + L" " + wfunc + L") " + msg);
-		throw std::runtime_error("Fatal error: " + std::string(msg.begin(), msg.end()));
-	}
-}
+		std::lock_guard lock(s_mutex);
 
-void KSLogger::WriteCrashLog(const std::wstring& msg)
-{
-	std::wofstream file(L"crash.log", std::ios::app);
-	if (file.is_open())
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		GetConsoleScreenBufferInfo(hConsole, &csbi);
+		WORD oldColor = csbi.wAttributes;
+
+		std::wstring wfile = ToWide(file);
+		std::wstring wfunc = ToWide(func);
+
+		SetConsoleTextAttribute(hConsole, GetColor(level));
+		std::wcout << L"[" << GetTimestamp() << L"] [" << LevelToString(level) << L"] "
+			<< L"(" << wfile << L":" << line << L" " << wfunc << L") "
+			<< msg << std::endl;
+		SetConsoleTextAttribute(hConsole, oldColor);
+
+		if (level == Level::Fatal)
+		{
+			WriteCrashLog(L"(" + wfile + L":" + std::to_wstring(line) + L" " + wfunc + L") " + msg);
+			throw std::runtime_error("Fatal error: " + std::string(msg.begin(), msg.end()));
+		}
+	}
+
+	void KSLogger::WriteCrashLog(const std::wstring& msg)
 	{
-		file << L"[" << GetTimestamp() << L"] [FATAL] " << msg << std::endl;
+		std::wofstream file(L"crash.log", std::ios::app);
+		if (file.is_open())
+		{
+			file << L"[" << GetTimestamp() << L"] [FATAL] " << msg << std::endl;
+		}
 	}
-}
 
 
-std::wstring KSLogger::FormatHRESULT(HRESULT hr)
-{
-	std::wstringstream ss;
-	ss << L"0x" << std::hex << std::uppercase << std::setw(8) << std::setfill(L'0') << hr;
-	_com_error err(hr);
-	ss << L" (" << err.ErrorMessage() << L")";
-	return ss.str();
-}
+	std::wstring KSLogger::FormatHRESULT(HRESULT hr)
+	{
+		std::wstringstream ss;
+		ss << L"0x" << std::hex << std::uppercase << std::setw(8) << std::setfill(L'0') << hr;
+		_com_error err(hr);
+		ss << L" (" << err.ErrorMessage() << L")";
+		return ss.str();
+	}
 
-void KSLogger::Fatal(const char* file, int line, const char* func, std::wstring_view msg)
-{
-	LogImpl(Level::Fatal, file, line, func, std::wstring(msg));
-	std::terminate();
+	void KSLogger::Fatal(const char* file, int line, const char* func, std::wstring_view msg)
+	{
+		LogImpl(Level::Fatal, file, line, func, std::wstring(msg));
+		std::terminate();
+	}
 }

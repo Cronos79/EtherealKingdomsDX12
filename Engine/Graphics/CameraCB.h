@@ -1,8 +1,11 @@
 #pragma once
 #include <DirectXMath.h>
 
-struct CameraCB
+namespace KSEngine
 {
-	DirectX::XMFLOAT4X4 view;
-	DirectX::XMFLOAT4X4 proj;
-};
+	struct CameraCB
+	{
+		DirectX::XMFLOAT4X4 view;
+		DirectX::XMFLOAT4X4 proj;
+	};
+}
