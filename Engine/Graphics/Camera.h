@@ -1,16 +1,24 @@
 #pragma once
 #include <DirectXMath.h>
+#include <wrl/client.h>
+#include <d3d12.h>
+#include "CameraCB.h"
 
 class Camera
 {
 public:
 	Camera();
 
-	// Set up a perspective projection
-	void SetPerspective(float fovY, float aspect, float nearZ, float farZ);
+	// Setup
+	void Init(float aspect, float fovY = DirectX::XM_PIDIV4, float nearZ = 0.1f, float farZ = 100.0f);
+	// ImGui UI
+	void DrawUI();
+	// Update view/proj matrices if needed
+	void Update();
 
-	// Set up a look-at view matrix
-	void SetLookAt(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& at, const DirectX::XMFLOAT3& up);
+	void CreateConstantBuffer();
+	void UpdateConstantBuffer();
+	D3D12_GPU_VIRTUAL_ADDRESS GetCBVGPUAddress() const;
 
 	// Getters (as XMMATRIX for GPU upload)
 	DirectX::XMMATRIX GetView() const;
@@ -26,7 +34,29 @@ public:
 		return m_proj;
 	}
 
+	// Camera state
+	const DirectX::XMFLOAT3& GetPosition() const
+	{
+		return m_pos;
+	}
+	const DirectX::XMFLOAT3& GetTarget() const
+	{
+		return m_target;
+	}
+	const DirectX::XMFLOAT3& GetUp() const
+	{
+		return m_up;
+	}
+
+	void SetLookAt(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& at, const DirectX::XMFLOAT3& up);
+
 private:
 	DirectX::XMFLOAT4X4 m_view;
 	DirectX::XMFLOAT4X4 m_proj;
+	DirectX::XMFLOAT3 m_pos;
+	DirectX::XMFLOAT3 m_target;
+	DirectX::XMFLOAT3 m_up;
+	float m_fovY, m_aspect, m_nearZ, m_farZ;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_cameraCB;
 };

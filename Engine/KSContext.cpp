@@ -60,6 +60,11 @@ int32_t KSContext::GetHeight() const
 	return m_height;
 }
 
+float KSContext::GetAspectRatio() const
+{
+	return (float)m_width / (float)m_height;
+}
+
 bool KSContext::GetIsRunning() const
 {
 	return m_isRunning;

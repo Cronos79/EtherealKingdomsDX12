@@ -21,6 +21,7 @@ public:
 
 	int32_t GetWidth() const;	
 	int32_t GetHeight() const;
+	float GetAspectRatio() const;
 	bool GetIsRunning() const;
 	void StartRunning();
 	void StopRunning();
