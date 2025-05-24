@@ -50,6 +50,7 @@ void GameApp::RenderFrame()
 
 	m_camera.DrawUI();
 	m_camera.UpdateConstantBuffer();
+	m_camera.HandleInput();
 
 	// Set viewport and scissor
 	D3D12_VIEWPORT viewport = {};

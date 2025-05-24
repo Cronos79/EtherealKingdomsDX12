@@ -165,6 +165,7 @@
     <ClInclude Include="Engine\Graphics\Model.h" />
     <ClInclude Include="Engine\KSContext.h" />
     <ClInclude Include="Engine\Logger\KSLogger.h" />
+    <ClInclude Include="Engine\Platform\Keyboard.h" />
     <ClInclude Include="Engine\Platform\KSWindow.h" />
     <ClInclude Include="Engine\Platform\WinInclude.h" />
     <ClInclude Include="Game\GameApp.h" />

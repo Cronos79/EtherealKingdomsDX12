@@ -159,6 +159,12 @@ LRESULT KSWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) n
 		}
 		break;
 	}
+	case WM_KEYDOWN:
+		KSContext::Instance().GetKeyboard().OnKeyDown(static_cast<int>(wParam));
+		break;
+	case WM_KEYUP:
+		KSContext::Instance().GetKeyboard().OnKeyUp(static_cast<int>(wParam));
+		break;
 	default:
 		break;
 	}

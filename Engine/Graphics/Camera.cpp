@@ -41,6 +41,52 @@ void Camera::Update()
 	SetLookAt(m_pos, m_target, m_up);
 }
 
+void Camera::HandleInput()
+{
+	auto& keyboard = KSContext::Instance().GetKeyboard();
+
+	// Compute forward and right directions
+	XMVECTOR pos = XMLoadFloat3(&m_pos);
+	XMVECTOR target = XMLoadFloat3(&m_target);
+	XMVECTOR up = XMLoadFloat3(&m_up);
+	XMVECTOR forward = XMVector3Normalize(XMVectorSubtract(target, pos));
+	XMVECTOR right = XMVector3Normalize(XMVector3Cross(up, forward));
+
+	bool changed = false;
+
+	if (keyboard.IsKeyDown('W'))
+	{
+		// Move camera position forward
+		XMVECTOR newPos = XMVectorAdd(pos, XMVectorScale(forward, m_zoomSpeed));
+		XMStoreFloat3(&m_pos, newPos);
+		changed = true;
+	}
+	if (keyboard.IsKeyDown('S'))
+	{
+		// Move camera position backward
+		XMVECTOR newPos = XMVectorSubtract(pos, XMVectorScale(forward, m_zoomSpeed));
+		XMStoreFloat3(&m_pos, newPos);
+		changed = true;
+	}
+	if (keyboard.IsKeyDown('A'))
+	{
+		// Move camera position left
+		XMVECTOR newPos = XMVectorSubtract(pos, XMVectorScale(right, m_zoomSpeed));
+		XMStoreFloat3(&m_pos, newPos);
+		changed = true;
+	}
+	if (keyboard.IsKeyDown('D'))
+	{
+		// Move camera position right
+		XMVECTOR newPos = XMVectorAdd(pos, XMVectorScale(right, m_zoomSpeed));
+		XMStoreFloat3(&m_pos, newPos);
+		changed = true;
+	}
+
+	if (changed)
+		Update();
+}
+
 void Camera::DrawUI()
 {
 	ImGui::Begin("Camera Controls");
@@ -49,6 +95,7 @@ void Camera::DrawUI()
 	changed |= ImGui::InputFloat3("Target", &m_target.x, "%.2f");
 	changed |= ImGui::InputFloat3("Up", &m_up.x, "%.2f");
 	changed |= ImGui::SliderAngle("FOV Y", &m_fovY, 10.0f, 120.0f);
+	changed |= ImGui::SliderFloat("ZoomSpeed", &m_zoomSpeed, 0.01f, 5.0f, "%.2f");
 	if (changed || ImGui::Button("Update Camera"))
 		Update();
 	ImGui::End();

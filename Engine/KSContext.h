@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "Platform/KSWindow.h"
 #include "Graphics/KSDirectX12.h"
+#include "Platform/Keyboard.h"
 
 class KSContext {
 public:
@@ -32,6 +33,16 @@ public:
 	void Initialize(const std::wstring& title, int width, int height);
 
 	void Resize(int width, int height);
+
+	Keyboard& GetKeyboard()
+	{
+		return m_keyboard;
+	}
+	// For convenience:
+	bool KeyDown(int key) const
+	{
+		return m_keyboard.IsKeyDown(key);
+	}
 private:
 	int32_t m_width = 1920;
 	int32_t m_height = 1080;
@@ -39,6 +50,7 @@ private:
 	std::wstring m_title = L"Unknown";
 	// If app is running
 	bool m_isRunning = true;
+	Keyboard m_keyboard;
 
 private:
 	KSContext() = default;

@@ -15,6 +15,7 @@ public:
 	void DrawUI();
 	// Update view/proj matrices if needed
 	void Update();
+	void HandleInput();
 
 	void CreateConstantBuffer();
 	void UpdateConstantBuffer();
@@ -59,4 +60,5 @@ private:
 	float m_fovY, m_aspect, m_nearZ, m_farZ;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_cameraCB;
+	float m_zoomSpeed = 0.1f;
 };

@@ -54,6 +54,7 @@
     <ClInclude Include="ThirdParty\imgui\imstb_rectpack.h" />
     <ClInclude Include="ThirdParty\imgui\imstb_textedit.h" />
     <ClInclude Include="ThirdParty\imgui\imstb_truetype.h" />
+    <ClInclude Include="Engine\Platform\Keyboard.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
