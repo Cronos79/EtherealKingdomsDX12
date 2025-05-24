@@ -7,6 +7,10 @@
 #endif
 #include "../KSContext.h"
 
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx12.h"
+
 using namespace Microsoft::WRL;
 
 KSDirectX12::KSDirectX12()
@@ -23,6 +27,10 @@ KSDirectX12::~KSDirectX12()
 		WaitForSingleObject(m_fenceEvent, INFINITE);
 		CloseHandle(m_fenceEvent);
 	}
+
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 }
 
 bool KSDirectX12::Initialize()
@@ -79,6 +87,14 @@ bool KSDirectX12::Initialize()
 		LOG_ERROR(L"Failed to create fence.");
 		return false;
 	}
+	result = CreateSRVHeap();
+	if (!result)
+	{
+		LOG_ERROR(L"Failed to create SRV heap.");
+		return false;
+	}
+	// Setup ImGui
+	SetupImGui();
 
 	LOG_INFO(L"DirectX 12 initialized successfully.");
 	return result;
@@ -89,6 +105,10 @@ void KSDirectX12::BeginFrame()
 	// Reset allocator and command list
 	m_commandAllocator->Reset();
 	m_commandList->Reset(m_commandAllocator.Get(), nullptr);
+
+	// Set descriptor heaps (SRV heap for ImGui and any shaders)
+	ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
+	m_commandList->SetDescriptorHeaps(_countof(heaps), heaps);
 
 	// Set render target
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -103,11 +123,17 @@ void KSDirectX12::BeginFrame()
 
 	// Clear render target
 	const float clearColor[] = { 0.1f, 0.1f, 0.2f, 1.0f };
-	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);	
+
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();	
 }
 
 void KSDirectX12::EndFrame()
 {
+	ImGui::Render();
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_commandList.Get());
 	// Transition back to present
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_renderTargets[m_frameIndex].Get(),
@@ -376,6 +402,42 @@ bool KSDirectX12::CreateFence()
 		return false;
 	}
 	LOG_INFO(L"DirectX 12 fence created successfully.");
+	return true;
+}
+
+bool KSDirectX12::SetupImGui()
+{
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui::StyleColorsDark();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(KSContext::Instance().GetHWND()); // Pass your HWND
+	ImGui_ImplDX12_Init(
+		m_device.Get(),
+		s_BufferCount,
+		DXGI_FORMAT_R8G8B8A8_UNORM, // Use your swapchain format
+		m_srvHeap.Get(), // SRV heap, not RTV heap
+		m_srvHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_srvHeap->GetGPUDescriptorHandleForHeapStart()
+	);
+	return true;
+}
+
+bool KSDirectX12::CreateSRVHeap()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	srvHeapDesc.NumDescriptors = 100; // Adjust as needed
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	srvHeapDesc.NodeMask = 0;
+	HRESULT hr = m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap));
+	if (FAILED(hr))
+	{
+		LOG_ERROR(L"Failed to create SRV descriptor heap. HRESULT: {}", KSLogger::FormatHRESULT(hr));
+		return false;
+	}
+	LOG_INFO(L"SRV descriptor heap created successfully.");
 	return true;
 }
 

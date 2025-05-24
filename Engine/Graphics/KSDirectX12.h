@@ -59,6 +59,10 @@ public:
 	{
 		return m_fenceValue;
 	}
+	ID3D12DescriptorHeap* GetSRVHeap()
+	{
+		return m_srvHeap.Get();
+	}
 	void IncrementFenceValue()
 	{
 		m_fenceValue++;
@@ -76,6 +80,8 @@ private:
 	bool CreateCommandList();
 	bool CreateRenderTargets();
 	bool CreateFence();
+	bool SetupImGui();
+	bool CreateSRVHeap();
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Debug> m_debugController;
@@ -86,6 +92,8 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> m_swapChain;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_commandAllocator;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_srvHeap;
 
 	const static UINT s_BufferCount = 2;
 

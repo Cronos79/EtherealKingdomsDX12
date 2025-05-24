@@ -3,6 +3,8 @@
 #include "Engine/Graphics/Mesh.h"
 #include "Engine/Graphics/Material.h"
 
+#include "imgui.h"
+
 GameApp::GameApp()
 {
 }
@@ -78,6 +80,7 @@ void GameApp::Initialize()
 	}
 	CloseHandle(fenceEvent);
 
+	// For testing
 	AddModel("TestModel.fbx");
 }
 
@@ -99,8 +102,9 @@ void GameApp::AddModel(const std::string& filename)
 {
 	auto& dx12 = KSContext::Instance().GetDirectX12();
 	auto device = dx12.GetDevice();
-	m_models.push_back(std::make_unique<Model>());
-	m_models[0]->LoadFromFile(device, filename);
+	auto model = std::make_unique<Model>();
+	model->LoadFromFile(device, filename);
+	m_models.push_back(std::move(model));
 }
 
 void GameApp::SetCamera()
@@ -124,6 +128,11 @@ void GameApp::RenderFrame()
 	auto cmdList = dx12.GetCommandList();
 
 	dx12.BeginFrame();
+
+	// Your ImGui code here
+	ImGui::Begin("Hello, ImGui!");
+	ImGui::Text("This is a test window.");
+	ImGui::End();
 
 	SetCamera();
 

@@ -1,6 +1,7 @@
 #include "Engine/Platform/KSWindow.h"
 #include "../KSContext.h"
 #include "../Logger/KSLogger.h"
+#include "imgui_impl_win32.h"
 
 KSWindow::KSWindow(const std::wstring& title, int width, int height)
 	: m_windowClassName(L"KSWindowClass")
@@ -129,8 +130,11 @@ LRESULT CALLBACK KSWindow::HandleMsgRedirect(HWND hWnd, UINT msg, WPARAM wParam,
 	return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
 }
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT KSWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
 	switch (msg)
 	{
 	case WM_CLOSE:
