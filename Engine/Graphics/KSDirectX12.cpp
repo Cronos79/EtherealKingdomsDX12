@@ -22,9 +22,9 @@ namespace KSEngine
 
 	KSDirectX12::~KSDirectX12()
 	{
-		if (m_commandQueue && m_fence && m_fenceEvent)
+		if (m_commandQueue.Get() && m_fence && m_fenceEvent)
 		{
-			m_commandQueue->Signal(m_fence.Get(), m_fenceValue);
+			m_commandQueue.Get()->Signal(m_fence.Get(), m_fenceValue);
 			m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
 			WaitForSingleObject(m_fenceEvent, INFINITE);
 			CloseHandle(m_fenceEvent);
@@ -37,29 +37,41 @@ namespace KSEngine
 
 	bool KSDirectX12::Initialize()
 	{
-		LOG_INFO(L"Initializing DirectX 12...");
-		bool result = false;
+		bool enableDebug = false;
+#if defined(_DEBUG)
+		enableDebug = true;
 		// Setup debug layer
 		SetupDebugLayer();
-		result = CreateFactory();
+#endif
+		if (showDebugInfo)
+		{
+			LOG_INFO(L"Initializing DirectX 12...");
+		}		
+		bool result = m_factory.Init(enableDebug, showDebugInfo);
 		if (!result)
 		{
 			LOG_ERROR(L"Failed to create DirectX 12 factory.");
 			return false;
 		}
-		result = CreateDevice();
+		result = CreateAdapter();
+		if (!result)
+		{
+			LOG_ERROR(L"Failed to create DirectX 12 adapter.");
+			return false;
+		}
+		result = m_device.Init(m_adapter.Get(), showDebugInfo);
 		if (!result)
 		{
 			LOG_ERROR(L"Failed to create DirectX 12 device.");
 			return false;
 		}
-		result = CreateCommandQueue();
+		result = m_commandQueue.Init(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT, showDebugInfo);
 		if (!result)
 		{
 			LOG_ERROR(L"Failed to create DirectX 12 command queue.");
 			return false;
 		}
-		result = CreateSwapChain();
+		result = m_swapChain.Init(m_factory, m_commandQueue, KSContext::Instance().GetHWND(), KSContext::Instance().GetWidth(), KSContext::Instance().GetHeight(), s_BufferCount, DXGI_FORMAT_R8G8B8A8_UNORM, showDebugInfo);
 		if (!result)
 		{
 			LOG_ERROR(L"Failed to create DirectX 12 swap chain.");
@@ -148,22 +160,22 @@ namespace KSEngine
 
 		// Execute command list
 		ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-		m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+		m_commandQueue.Get()->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
 		Present();
 	}
 
 	void KSDirectX12::Present()
 	{
-		m_swapChain->Present(1, 0);
+		m_swapChain.Get()->Present(1, 0);
 
 		// Signal and increment the fence value
 		const UINT64 currentFenceValue = m_fenceValue;
-		m_commandQueue->Signal(m_fence.Get(), currentFenceValue);
+		m_commandQueue.Get()->Signal(m_fence.Get(), currentFenceValue);
 		m_fenceValue++;
 
 		// Update frame index
-		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+		m_frameIndex = m_swapChain.GetCurrentBackBufferIndex();
 
 		// Wait until the previous frame is finished
 		if (m_fence->GetCompletedValue() < currentFenceValue)
@@ -186,143 +198,30 @@ namespace KSEngine
 			LOG_WARNING(L"Failed to enable DirectX 12 debug layer.");
 		}
 #endif
-	}
+	}	
 
-	bool KSDirectX12::CreateFactory()
-	{
-		// Create DirectX12 DXGIFactory2 with debug support
-#if defined(_DEBUG)
-		HRESULT hr = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&m_factory));
-		if (FAILED(hr))
-		{
-			LOG_ERROR(L"Failed to create DirectX 12 factory with debug support. HRESULT: {}", KSLogger::FormatHRESULT(hr));
-			return false;
-		}
-		LOG_INFO(L"DirectX 12 factory with debug support created successfully.");
-#else
-		HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&m_factory));
-		if (FAILED(hr))
-		{
-			LOG_ERROR(L"Failed to create DirectX 12 factory. HRESULT: {}", KSLogger::FormatHRESULT(hr));
-			return false;
-		}
-		LOG_INFO(L"DirectX 12 factory created successfully.");
-#endif
-
-		// Check for hardware support
-		ComPtr<IDXGIFactory6> factory6;
-		if (SUCCEEDED(m_factory->QueryInterface(IID_PPV_ARGS(&factory6))))
-		{
-			for (UINT i = 0;
-				factory6->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&m_adapter)) != DXGI_ERROR_NOT_FOUND;
-				++i)
-			{
-				DXGI_ADAPTER_DESC1 desc;
-				m_adapter->GetDesc1(&desc);
-				LOG_INFO(L"Found hardware adapter: {}", desc.Description);
-				m_adapter.Reset();
-			}
-		}
-		else
-		{
-			LOG_WARNING(L"Failed to query IDXGIFactory6 for hardware adapters.");
-			return false;
-		}
-		LOG_INFO(L"DirectX 12 hardware support check completed.");
-		return true;
-	}
-
-	bool KSDirectX12::CreateDevice()
+	bool KSDirectX12::CreateAdapter()
 	{
 		// Create DirectX 12 device
 		ComPtr<IDXGIFactory6> factory6;
-		if (SUCCEEDED(m_factory->QueryInterface(IID_PPV_ARGS(&factory6))))
+		if (SUCCEEDED(m_factory.Get()->QueryInterface(IID_PPV_ARGS(&factory6))))
 		{
 			if (SUCCEEDED(factory6->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&m_adapter))))
 			{
-				if (FAILED(D3D12CreateDevice(m_adapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&m_device))))
+				if (showDebugInfo)
 				{
-					LOG_ERROR(L"Failed to create DirectX 12 device.");
-					return false;
+					LOG_INFO(L"DirectX 12 adapter created successfully.");
 				}
-				LOG_INFO(L"DirectX 12 device created successfully.");
-			}
-			else
-			{
-				LOG_ERROR(L"Failed to enumerate DirectX 12 adapters.");
-				return false;
+				return true;
 			}
 		}
-		else
-		{
-			LOG_ERROR(L"Failed to query IDXGIFactory6 for DirectX 12 device.");
-			return false;
-		}
-		return true;
-	}
-
-	bool KSDirectX12::CreateCommandQueue()
-	{
-		// Create command queue
-		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-		queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-		queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-		queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
-		queueDesc.NodeMask = 0;
-		HRESULT hr = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue));
-		if (FAILED(hr))
-		{
-			LOG_ERROR(L"Failed to create DirectX 12 command queue. HRESULT: {}", KSLogger::FormatHRESULT(hr));
-			return false;
-		}
-		LOG_INFO(L"DirectX 12 command queue created successfully.");
-		return true;
-	}
-
-	bool KSDirectX12::CreateSwapChain()
-	{
-		// Create swap chain
-		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-		swapChainDesc.BufferCount = s_BufferCount;
-		swapChainDesc.Width = KSContext::Instance().GetWidth();
-		swapChainDesc.Height = KSContext::Instance().GetHeight();
-		swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		swapChainDesc.SampleDesc.Count = 1;
-		swapChainDesc.SampleDesc.Quality = 0;
-		swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-		ComPtr<IDXGISwapChain1> swapChain1;
-		HRESULT hr = m_factory->CreateSwapChainForHwnd(
-			m_commandQueue.Get(),
-			KSContext::Instance().GetHWND(),
-			&swapChainDesc,
-			nullptr,
-			nullptr,
-			&swapChain1
-		);
-		if (FAILED(hr))
-		{
-			LOG_ERROR(L"Failed to create DirectX 12 swap chain. HRESULT: {}", KSLogger::FormatHRESULT(hr));
-			return false;
-		}
-		hr = swapChain1.As(&m_swapChain); // m_swapChain is ComPtr<IDXGISwapChain3>
-		if (FAILED(hr))
-		{
-			LOG_ERROR(L"Failed to query IDXGISwapChain3 from swap chain. HRESULT: {}", KSLogger::FormatHRESULT(hr));
-			return false;
-		}
-		LOG_INFO(L"DirectX 12 swap chain created successfully.");
-		return true;
-	}
+		return false;
+	}	
 
 	bool KSDirectX12::CreateCommandAllocator()
 	{
 		// Create command allocator
-		HRESULT hr = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator));
+		HRESULT hr = m_device.Get()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator));
 		if (FAILED(hr))
 		{
 			LOG_ERROR(L"Failed to create DirectX 12 command allocator. HRESULT: {}", KSLogger::FormatHRESULT(hr));
@@ -335,7 +234,7 @@ namespace KSEngine
 	bool KSDirectX12::CreateCommandList()
 	{
 		// Create command list
-		HRESULT hr = m_device->CreateCommandList(
+		HRESULT hr = m_device.Get()->CreateCommandList(
 			0,
 			D3D12_COMMAND_LIST_TYPE_DIRECT,
 			m_commandAllocator.Get(),
@@ -359,13 +258,13 @@ namespace KSEngine
 
 	bool KSDirectX12::CreateRenderTargets()
 	{
-		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		m_rtvDescriptorSize = m_device.Get()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
 		rtvHeapDesc.NumDescriptors = s_BufferCount;
 		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		if (FAILED(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap))))
+		if (FAILED(m_device.Get()->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap))))
 		{
 			LOG_ERROR(L"Failed to create RTV descriptor heap.");
 			return false;
@@ -375,23 +274,23 @@ namespace KSEngine
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 		for (UINT i = 0; i < s_BufferCount; ++i)
 		{
-			if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]))))
+			if (FAILED(m_swapChain.Get()->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]))))
 			{
 				LOG_ERROR(L"Failed to get swap chain buffer {}.", i);
 				return false;
 			}
-			m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
+			m_device.Get()->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
 			rtvHandle.Offset(1, m_rtvDescriptorSize);
 		}
 
-		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+		m_frameIndex = m_swapChain.GetCurrentBackBufferIndex();
 		LOG_INFO(L"DirectX 12 render targets created successfully.");
 		return true;
 	}
 
 	bool KSDirectX12::CreateFence()
 	{
-		if (FAILED(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence))))
+		if (FAILED(m_device.Get()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence))))
 		{
 			LOG_ERROR(L"Failed to create fence.");
 			return false;
@@ -433,7 +332,7 @@ namespace KSEngine
 		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		srvHeapDesc.NodeMask = 0;
-		HRESULT hr = m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap));
+		HRESULT hr = m_device.Get()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap));
 		if (FAILED(hr))
 		{
 			LOG_ERROR(L"Failed to create SRV descriptor heap. HRESULT: {}", KSLogger::FormatHRESULT(hr));

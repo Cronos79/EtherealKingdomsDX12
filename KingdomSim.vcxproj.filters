@@ -34,6 +34,10 @@
     <ClCompile Include="ThirdParty\imgui\imgui_tables.cpp" />
     <ClCompile Include="ThirdParty\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Engine\Assets\AssetManager.cpp" />
+    <ClCompile Include="Engine\Graphics\KSFactory.cpp" />
+    <ClCompile Include="Engine\Graphics\KSDevice.cpp" />
+    <ClCompile Include="Engine\Graphics\KSCommandQueue.cpp" />
+    <ClCompile Include="Engine\Graphics\KSSwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\GameApp.h" />
@@ -59,6 +63,10 @@
     <ClInclude Include="Engine\Assets\AssetManager.h" />
     <ClInclude Include="Engine\Assets\Texture.h" />
     <ClInclude Include="Engine\Assets\Sound.h" />
+    <ClInclude Include="Engine\Graphics\KSFactory.h" />
+    <ClInclude Include="Engine\Graphics\KSDevice.h" />
+    <ClInclude Include="Engine\Graphics\KSCommandQueue.h" />
+    <ClInclude Include="Engine\Graphics\KSSwapChain.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

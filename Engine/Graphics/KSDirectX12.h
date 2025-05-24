@@ -9,6 +9,10 @@
 #include <d3dx12.h>
 
 #include <wrl.h>
+#include "KSFactory.h"
+#include "KSDevice.h"
+#include "KSCommandQueue.h"
+#include "KSSwapChain.h"
 
 namespace KSEngine
 {
@@ -74,10 +78,7 @@ namespace KSEngine
 		void Present();
 
 		void SetupDebugLayer();
-		bool CreateFactory();
-		bool CreateDevice();
-		bool CreateCommandQueue();
-		bool CreateSwapChain();
+		bool CreateAdapter();
 		bool CreateCommandAllocator();
 		bool CreateCommandList();
 		bool CreateRenderTargets();
@@ -86,12 +87,14 @@ namespace KSEngine
 		bool CreateSRVHeap();
 
 	private:
+		bool showDebugInfo = false;
+
 		Microsoft::WRL::ComPtr<ID3D12Debug> m_debugController;
-		Microsoft::WRL::ComPtr<IDXGIFactory7> m_factory;
+		KSFactory m_factory;
 		Microsoft::WRL::ComPtr<IDXGIAdapter1> m_adapter;
-		Microsoft::WRL::ComPtr<ID3D12Device14> m_device;
-		Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_commandQueue;
-		Microsoft::WRL::ComPtr<IDXGISwapChain3> m_swapChain;
+		KSDevice m_device;
+		KSCommandQueue m_commandQueue;
+		KSSwapChain m_swapChain;
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_commandAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
 

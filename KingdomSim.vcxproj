@@ -140,7 +140,11 @@
   <ItemGroup>
     <ClCompile Include="Engine\Assets\AssetManager.cpp" />
     <ClCompile Include="Engine\Graphics\Camera.cpp" />
+    <ClCompile Include="Engine\Graphics\KSCommandQueue.cpp" />
+    <ClCompile Include="Engine\Graphics\KSDevice.cpp" />
     <ClCompile Include="Engine\Graphics\KSDirectX12.cpp" />
+    <ClCompile Include="Engine\Graphics\KSFactory.cpp" />
+    <ClCompile Include="Engine\Graphics\KSSwapChain.cpp" />
     <ClCompile Include="Engine\Graphics\Material.cpp" />
     <ClCompile Include="Engine\Graphics\Mesh.cpp" />
     <ClCompile Include="Engine\Graphics\Model.cpp" />
@@ -163,7 +167,11 @@
     <ClInclude Include="Engine\Assets\Texture.h" />
     <ClInclude Include="Engine\Graphics\Camera.h" />
     <ClInclude Include="Engine\Graphics\CameraCB.h" />
+    <ClInclude Include="Engine\Graphics\KSCommandQueue.h" />
+    <ClInclude Include="Engine\Graphics\KSDevice.h" />
     <ClInclude Include="Engine\Graphics\KSDirectX12.h" />
+    <ClInclude Include="Engine\Graphics\KSFactory.h" />
+    <ClInclude Include="Engine\Graphics\KSSwapChain.h" />
     <ClInclude Include="Engine\Graphics\Material.h" />
     <ClInclude Include="Engine\Graphics\Mesh.h" />
     <ClInclude Include="Engine\Graphics\Model.h" />
