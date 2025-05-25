@@ -1,6 +1,7 @@
 // VS.hlsl
 cbuffer CameraBuffer : register(b0)
 {
+    float4x4 world;
     float4x4 view;
     float4x4 proj;
 };
@@ -23,9 +24,8 @@ struct VSOutput
 VSOutput main(VSInput input)
 {
     VSOutput output;
-    float4 worldPos = float4(input.position, 1.0f);
-    output.position = mul(worldPos, view);
-    output.position = mul(output.position, proj);
+    float4 pos = float4(input.position, 1.0f);
+    output.position = mul(mul(mul(pos, world), view), proj);
     output.normal = input.normal;
     output.texcoord = input.texcoord;
     return output;
