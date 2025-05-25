@@ -1,11 +1,13 @@
 #include "Mesh.h"
 #include <d3dx12.h> // For CD3DX12 helpers
+#include "../Logger/KSLogger.h"
 
 namespace KSEngine
 {
 	Mesh::Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
 		const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 	{
+		LOG_INFO(L"Creating mesh with {} vertices and {} indices.", vertices.size(), indices.size());
 		m_indexCount = static_cast<UINT>(indices.size());
 
 		// --- Vertex Buffer ---
@@ -13,17 +15,27 @@ namespace KSEngine
 		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 		CD3DX12_RESOURCE_DESC vbDesc = CD3DX12_RESOURCE_DESC::Buffer(vbSize);
 
-		device->CreateCommittedResource(
+		HRESULT hr = device->CreateCommittedResource(
 			&heapProps, D3D12_HEAP_FLAG_NONE, &vbDesc,
 			D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 			IID_PPV_ARGS(&m_vertexBuffer));
+		if (FAILED(hr))
+		{
+			LOG_ERROR(L"Failed to create vertex buffer resource. HRESULT: {}", KSLogger::FormatHRESULT(hr));
+			return;
+		}
 
 		// Upload heap for vertex buffer
 		CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
-		device->CreateCommittedResource(
+		hr = device->CreateCommittedResource(
 			&uploadHeapProps, D3D12_HEAP_FLAG_NONE, &vbDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 			IID_PPV_ARGS(&m_vertexBufferUpload));
+		if (FAILED(hr))
+		{
+			LOG_ERROR(L"Failed to create vertex buffer upload resource. HRESULT: {}", KSLogger::FormatHRESULT(hr));
+			return;
+		}
 
 		// Copy vertex data
 		void* mappedData = nullptr;
@@ -46,15 +58,25 @@ namespace KSEngine
 		const UINT ibSize = UINT(indices.size() * sizeof(uint32_t));
 		CD3DX12_RESOURCE_DESC ibDesc = CD3DX12_RESOURCE_DESC::Buffer(ibSize);
 
-		device->CreateCommittedResource(
+		hr = device->CreateCommittedResource(
 			&heapProps, D3D12_HEAP_FLAG_NONE, &ibDesc,
 			D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 			IID_PPV_ARGS(&m_indexBuffer));
+		if (FAILED(hr))
+		{
+			LOG_ERROR(L"Failed to create index buffer resource. HRESULT: {}", KSLogger::FormatHRESULT(hr));
+			return;
+		}
 
-		device->CreateCommittedResource(
+		hr = device->CreateCommittedResource(
 			&uploadHeapProps, D3D12_HEAP_FLAG_NONE, &ibDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 			IID_PPV_ARGS(&m_indexBufferUpload));
+		if (FAILED(hr))
+		{
+			LOG_ERROR(L"Failed to create index buffer upload resource. HRESULT: {}", KSLogger::FormatHRESULT(hr));
+			return;
+		}
 
 		m_indexBufferUpload->Map(0, nullptr, &mappedData);
 		memcpy(mappedData, indices.data(), ibSize);
@@ -70,6 +92,7 @@ namespace KSEngine
 		m_ibView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
 		m_ibView.SizeInBytes = ibSize;
 		m_ibView.Format = DXGI_FORMAT_R32_UINT;
+		LOG_INFO(L"Mesh created successfully.");
 	}
 
 	void Mesh::Draw(ID3D12GraphicsCommandList* cmdList) const

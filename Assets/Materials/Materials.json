@@ -1,0 +1,6 @@
+{
+  "YellowMaterial": {
+    "VertexShader": "Assets/Shaders/YellowVS.cso",
+    "PixelShader": "Assets/Shaders/YellowPS.cso"
+  }
+}

@@ -13,6 +13,12 @@
 #include "KSDevice.h"
 #include "KSCommandQueue.h"
 #include "KSSwapChain.h"
+#include "KSCommandAllocator.h"
+#include "KSCommandList.h"
+#include "KSRenderTargets.h"
+#include "KSFence.h"
+#include "KSSRVHeap.h"
+#include "KSAdapter.h"
 
 namespace KSEngine
 {
@@ -51,11 +57,11 @@ namespace KSEngine
 		}
 		ID3D12DescriptorHeap* GetRTVHeap()
 		{
-			return m_rtvHeap.Get();
+			return m_renderTargets.GetRTVHeap();
 		}
 		ID3D12Resource* GetRenderTarget()
 		{
-			return m_renderTargets[m_frameIndex].Get();
+			return m_renderTargets.GetRenderTarget(m_frameIndex);
 		}
 		ID3D12Fence* GetFence()
 		{
@@ -63,7 +69,7 @@ namespace KSEngine
 		}
 		UINT64 GetFenceValue()
 		{
-			return m_fenceValue;
+			return m_fence.GetValue();
 		}
 		ID3D12DescriptorHeap* GetSRVHeap()
 		{
@@ -71,44 +77,29 @@ namespace KSEngine
 		}
 		void IncrementFenceValue()
 		{
-			m_fenceValue++;
+			m_fence.IncrementValue();
 		}
 
 	private:
 		void Present();
-
 		void SetupDebugLayer();
-		bool CreateAdapter();
-		bool CreateCommandAllocator();
-		bool CreateCommandList();
-		bool CreateRenderTargets();
-		bool CreateFence();
 		bool SetupImGui();
-		bool CreateSRVHeap();
 
 	private:
 		bool showDebugInfo = false;
+		const static UINT s_BufferCount = 2;
+		UINT m_frameIndex = 0;
 
 		Microsoft::WRL::ComPtr<ID3D12Debug> m_debugController;
 		KSFactory m_factory;
-		Microsoft::WRL::ComPtr<IDXGIAdapter1> m_adapter;
+		KSAdapter m_adapter;
 		KSDevice m_device;
 		KSCommandQueue m_commandQueue;
 		KSSwapChain m_swapChain;
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_commandAllocator;
-		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
-
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_srvHeap;
-
-		const static UINT s_BufferCount = 2;
-
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> m_renderTargets;
-		UINT m_rtvDescriptorSize = 0;
-		UINT m_frameIndex = 0;
-
-		Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
-		UINT64 m_fenceValue = 0;
-		HANDLE m_fenceEvent = nullptr;
+		KSCommandAllocator m_commandAllocator;
+		KSCommandList m_commandList;
+		KSRenderTargets m_renderTargets;
+		KSFence m_fence;
+		KSSRVHeap m_srvHeap;		
 	};
 }

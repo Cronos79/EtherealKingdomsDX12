@@ -38,6 +38,17 @@
     <ClCompile Include="Engine\Graphics\KSDevice.cpp" />
     <ClCompile Include="Engine\Graphics\KSCommandQueue.cpp" />
     <ClCompile Include="Engine\Graphics\KSSwapChain.cpp" />
+    <ClCompile Include="Engine\Graphics\KSCommandAllocator.cpp" />
+    <ClCompile Include="Engine\Graphics\KSCommandList.cpp" />
+    <ClCompile Include="Engine\Graphics\KSRenderTargets.cpp" />
+    <ClCompile Include="Engine\Graphics\KSFence.cpp" />
+    <ClCompile Include="Engine\Graphics\KSAdapter.cpp" />
+    <ClCompile Include="Engine\Graphics\KSSRVHeap.cpp" />
+    <ClCompile Include="Engine\Assets\GameObject.cpp" />
+    <ClCompile Include="Engine\Assets\Scene.cpp" />
+    <ClCompile Include="Engine\Assets\SceneManager.cpp" />
+    <ClCompile Include="Engine\Assets\GameConfig.cpp" />
+    <ClCompile Include="Engine\EngineApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\GameApp.h" />
@@ -61,18 +72,29 @@
     <ClInclude Include="ThirdParty\imgui\imstb_truetype.h" />
     <ClInclude Include="Engine\Platform\Keyboard.h" />
     <ClInclude Include="Engine\Assets\AssetManager.h" />
-    <ClInclude Include="Engine\Assets\Texture.h" />
     <ClInclude Include="Engine\Assets\Sound.h" />
     <ClInclude Include="Engine\Graphics\KSFactory.h" />
     <ClInclude Include="Engine\Graphics\KSDevice.h" />
     <ClInclude Include="Engine\Graphics\KSCommandQueue.h" />
     <ClInclude Include="Engine\Graphics\KSSwapChain.h" />
+    <ClInclude Include="Engine\Graphics\KSCommandAllocator.h" />
+    <ClInclude Include="Engine\Graphics\KSCommandList.h" />
+    <ClInclude Include="Engine\Graphics\KSRenderTargets.h" />
+    <ClInclude Include="Engine\Graphics\KSFence.h" />
+    <ClInclude Include="Engine\Graphics\KSAdapter.h" />
+    <ClInclude Include="Engine\Graphics\KSSRVHeap.h" />
+    <ClInclude Include="Engine\Assets\GameObject.h" />
+    <ClInclude Include="Engine\Assets\Scene.h" />
+    <ClInclude Include="Engine\Assets\SceneManager.h" />
+    <ClInclude Include="Engine\Assets\GameConfig.h" />
+    <ClInclude Include="Engine\EngineApp.h" />
+    <ClInclude Include="Engine\Graphics\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\VS.hlsl" />
-    <FxCompile Include="Shaders\PS.hlsl" />
+    <FxCompile Include="Shaders\YellowVS.hlsl" />
+    <FxCompile Include="Shaders\YellowPS.hlsl" />
   </ItemGroup>
 </Project>

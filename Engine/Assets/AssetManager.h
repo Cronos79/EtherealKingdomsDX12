@@ -2,42 +2,33 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include <vector>
 
-// Forward declarations
+struct aiScene;
 
 namespace KSEngine
 {
 	class Model;
-	class Texture;
-	class Material;
-	class Sound;
 
-	struct AssetBundle {
-		std::unique_ptr<KSEngine::Model> model;
-		std::vector<std::unique_ptr<KSEngine::Texture>> textures;
-		std::unique_ptr<KSEngine::Material> material;
-		std::vector<std::unique_ptr<KSEngine::Sound>> sounds;
-		// Add more as needed
+	struct ModelManifestEntry {
+		std::string fbxPath;
+		std::string materialName;
 	};
 
 	class AssetManager {
 	public:
 		static AssetManager& Instance();
 
-		// Loads all assets for a logical name (e.g., "Hero1")
-		AssetBundle* Load(const std::string& assetName);
-
-		// Optionally, get already loaded bundle
-		AssetBundle* Get(const std::string& assetName) const;
-
+		std::shared_ptr<Model> GetModel(const std::string& name);
+		void LoadManifest(const std::string& manifestPath);
 		void Clear();
 
 	private:
-		AssetManager() = default;
-		std::unordered_map<std::string, std::unique_ptr<AssetBundle>> m_bundles;
+		// Fix: Add reference for Model parameter
+		void PopulateModelFromAssimp(const aiScene* scene, const std::string& basePath, Model& model);
 
-		// Internal helpers
-		std::unique_ptr<AssetBundle> LoadBundleFromManifest(const std::string& assetName);
+		AssetManager() = default;
+
+		std::unordered_map<std::string, ModelManifestEntry> m_modelManifest;
+		std::unordered_map<std::string, std::shared_ptr<Model>> m_modelCache;
 	};
 }

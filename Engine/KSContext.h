@@ -4,6 +4,7 @@
 #include "Platform/KSWindow.h"
 #include "Graphics/KSDirectX12.h"
 #include "Platform/Keyboard.h"
+#include "Assets/GameConfig.h"
 
 namespace KSEngine
 {
@@ -45,6 +46,12 @@ namespace KSEngine
 		{
 			return m_keyboard.IsKeyDown(key);
 		}
+
+		// Get GameConfig
+		GameConfig& GetGameConfig()
+		{
+			return m_config;
+		}
 	private:
 		int32_t m_width = 1920;
 		int32_t m_height = 1080;
@@ -53,6 +60,8 @@ namespace KSEngine
 		// If app is running
 		bool m_isRunning = true;
 		Keyboard m_keyboard;
+
+		GameConfig m_config;
 
 	private:
 		KSContext() = default;

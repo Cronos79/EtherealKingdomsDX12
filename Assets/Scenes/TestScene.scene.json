@@ -1,0 +1,10 @@
+{
+    "name": "TestScene",
+    "objects": [
+        {
+            "name": "TestModel",
+            "model": "Test",
+            "position": [0, 0, 0]
+        }
+    ]
+}

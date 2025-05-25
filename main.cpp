@@ -11,8 +11,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
 
 	GameApp app;
-	app.Initialize();
-	app.Run();
+	app.Run(L"Kingdom game", 1920, 1080);
 
 	return 0;
 }

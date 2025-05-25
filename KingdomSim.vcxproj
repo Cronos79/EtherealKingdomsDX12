@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="packages\Microsoft.Direct3D.D3D12.1.615.1\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('packages\Microsoft.Direct3D.D3D12.1.615.1\build\native\Microsoft.Direct3D.D3D12.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -139,11 +139,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Assets\AssetManager.cpp" />
+    <ClCompile Include="Engine\Assets\GameConfig.cpp" />
+    <ClCompile Include="Engine\Assets\GameObject.cpp" />
+    <ClCompile Include="Engine\Assets\Scene.cpp" />
+    <ClCompile Include="Engine\Assets\SceneManager.cpp" />
+    <ClCompile Include="Engine\EngineApp.cpp" />
     <ClCompile Include="Engine\Graphics\Camera.cpp" />
+    <ClCompile Include="Engine\Graphics\KSAdapter.cpp" />
+    <ClCompile Include="Engine\Graphics\KSCommandAllocator.cpp" />
+    <ClCompile Include="Engine\Graphics\KSCommandList.cpp" />
     <ClCompile Include="Engine\Graphics\KSCommandQueue.cpp" />
     <ClCompile Include="Engine\Graphics\KSDevice.cpp" />
     <ClCompile Include="Engine\Graphics\KSDirectX12.cpp" />
     <ClCompile Include="Engine\Graphics\KSFactory.cpp" />
+    <ClCompile Include="Engine\Graphics\KSFence.cpp" />
+    <ClCompile Include="Engine\Graphics\KSRenderTargets.cpp" />
+    <ClCompile Include="Engine\Graphics\KSSRVHeap.cpp" />
     <ClCompile Include="Engine\Graphics\KSSwapChain.cpp" />
     <ClCompile Include="Engine\Graphics\Material.cpp" />
     <ClCompile Include="Engine\Graphics\Mesh.cpp" />
@@ -163,18 +174,29 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Assets\AssetManager.h" />
+    <ClInclude Include="Engine\Assets\GameConfig.h" />
+    <ClInclude Include="Engine\Assets\GameObject.h" />
+    <ClInclude Include="Engine\Assets\Scene.h" />
+    <ClInclude Include="Engine\Assets\SceneManager.h" />
     <ClInclude Include="Engine\Assets\Sound.h" />
-    <ClInclude Include="Engine\Assets\Texture.h" />
+    <ClInclude Include="Engine\EngineApp.h" />
     <ClInclude Include="Engine\Graphics\Camera.h" />
     <ClInclude Include="Engine\Graphics\CameraCB.h" />
+    <ClInclude Include="Engine\Graphics\KSAdapter.h" />
+    <ClInclude Include="Engine\Graphics\KSFence.h" />
+    <ClInclude Include="Engine\Graphics\KSCommandAllocator.h" />
+    <ClInclude Include="Engine\Graphics\KSCommandList.h" />
     <ClInclude Include="Engine\Graphics\KSCommandQueue.h" />
     <ClInclude Include="Engine\Graphics\KSDevice.h" />
     <ClInclude Include="Engine\Graphics\KSDirectX12.h" />
     <ClInclude Include="Engine\Graphics\KSFactory.h" />
+    <ClInclude Include="Engine\Graphics\KSRenderTargets.h" />
+    <ClInclude Include="Engine\Graphics\KSSRVHeap.h" />
     <ClInclude Include="Engine\Graphics\KSSwapChain.h" />
     <ClInclude Include="Engine\Graphics\Material.h" />
     <ClInclude Include="Engine\Graphics\Mesh.h" />
     <ClInclude Include="Engine\Graphics\Model.h" />
+    <ClInclude Include="Engine\Graphics\Texture.h" />
     <ClInclude Include="Engine\KSContext.h" />
     <ClInclude Include="Engine\Logger\KSLogger.h" />
     <ClInclude Include="Engine\Platform\Keyboard.h" />
@@ -194,7 +216,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\PS.hlsl">
+    <FxCompile Include="Shaders\YellowPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -202,7 +224,7 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.7</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.7</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Shaders\VS.hlsl">
+    <FxCompile Include="Shaders\YellowVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
